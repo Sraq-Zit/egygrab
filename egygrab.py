@@ -18,7 +18,7 @@ __version__ = "1.0"
 
 def check_updates(current_filename):
     URL = 'https://raw.githubusercontent.com/Sraq-Zit/egygrab/master/egygrab.py'
-    new_code = requests.head(URL).text
+    new_code = requests.get(URL).text
     version = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', new_code)
     if not version: return
     if __version__ != version[1]:
@@ -28,6 +28,7 @@ def check_updates(current_filename):
             try:
                 with open(current_filename, 'w') as f:
                     f.write(new_code)
+                print('UPDATED!')
             except Exception as e:
                 print('ERROR: could not update')
 

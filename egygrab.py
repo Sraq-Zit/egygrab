@@ -13,6 +13,23 @@ import sys
 import re
 import os
 
+__version__ = "1.0"
+
+
+def check_updates(current_filename):
+    URL = 'https://raw.githubusercontent.com/Sraq-Zit/egygrab/master/egygrab.py'
+    new_code = requests.head(URL).text
+    version = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', new_code)
+    if not version: return
+    if __version__ != version[1]:
+        res = ''
+        while res not in ['y', 'n']: res = input('There is a new update, update ?')
+        if res == 'y':
+            try:
+                with open(current_filename, 'w') as f:
+                    f.write(new_code)
+            except Exception as e:
+                print('ERROR: could not update')
 
 
 class TYPES(Enum): 
@@ -111,7 +128,7 @@ class EgyGrab():
                 data[a].append(l[i])
 
             vidstream = sess.get('https://egybest.org'+code, allow_redirects=False).headers['location']
-            if vidstream[0] == '/':
+            if vidstream[:2] == '/?':
                 verification = 'https://egybest.org/api?call='+(''.join([data[b][v] for v in data[a] if v in data[b]]))
                 click = 'https://egybest.org/'+base64.b64decode(re.search(r"=\['([^']+?)'\]", html)[1] + '===').decode('utf8')
                 res = sess.get(click).text
@@ -204,6 +221,8 @@ class EgyGrab():
             return self.__grab_item(url, quality, last_session, id)
 
 # Test series
+
+check_updates(sys.argv[0])
 
 URL = sys.argv[1]
 QUALITY = sys.argv[2] if len(sys.argv) > 2 else '1080p'

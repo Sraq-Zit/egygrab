@@ -28,7 +28,8 @@ def check_updates(current_filename):
             try:
                 with open(current_filename, 'w') as f:
                     f.write(new_code)
-                print('UPDATED!')
+                print('UPDATED! Run the command once again, exiting ..')
+                sys.exit()
             except Exception as e:
                 print('ERROR: could not update')
 

@@ -13,7 +13,7 @@ import sys
 import re
 import os
 
-__version__ = "1.0"
+__version__ = "1.1"
 
 
 def check_updates(current_filename):
@@ -29,6 +29,7 @@ def check_updates(current_filename):
                 with open(current_filename, 'w') as f:
                     f.write(new_code)
                 print('UPDATED! Run the command once again, exiting ..')
+                time.sleep(2)
                 sys.exit()
             except Exception as e:
                 print('ERROR: could not update')
@@ -141,9 +142,10 @@ class EgyGrab():
                 cipher = cipher.split(key[base])
                 cipher = [c.translate(c.maketrans(key, ''.join([str(i) for i in range(len(key))]))) for c in cipher]
                 cipher = [chr(int(c, base) - offset) for c in cipher if c]
+                # print(sess.cookies)
                 c_name, c_value = tuple(re.search(r'cookie="(.+?);', ''.join(cipher))[1].split('='))
                 sess.cookies.set(c_name, c_value)
-                time.sleep(.5)
+                time.sleep(1)
                 sess.post(verification, data={val[1]: val[2]})
                 vidstream = sess.get('https://egybest.org'+code, allow_redirects=False).headers['location']
                 sess.cookies.pop(c_name)
@@ -152,18 +154,19 @@ class EgyGrab():
                 pass
             # vidstream = 'https://egybest.org/vs-mirror/vidstream.to/f/YvD0EpU8nU'
             vidstream = 'https://egybest.org/vs-mirror/'+re.search(r'vidstream.+?\/f\/.+?\/', vidstream)[0]
+            # print(vidstream)
             html = sess.get(vidstream).text
             # print(html)
             # html = open('html.txt', encoding='utf-8').read()
 
             if not re.search('<a href="(h.+?)" class="bigbutton"', html):
-                a0c = literal_eval(re.search(r'var a0c=(\[.+?\]);var', html)[1])
-                a0d_offset = re.search(r'var a0d=function\(a,b\)\{a=a-([^;]+?);', html)[1]
+                a0c = literal_eval(re.search(r'var G=(\[.+?\]);', html)[1])
+                a0d_offset = re.search(r'return a0d=function\(d,e\)\{d=d-([^;]+?);', html)[1]
                 def a0d(a):
                     a=int(a, 16)-int(a0d_offset, 16)
                     return a0c[a]
 
-                parameters = re.search(r"function\(a,b\)\{var .=a0d;while\(!!\[\]\)\{try\{var .=([^;]+?);[^,]+?\(a0c,([^)].+?)\)", html)
+                parameters = re.search(r"function\(a,b\)\{var .=a0d.+?;while\(!!\[\]\)\{try\{var .=([^;]+?);[^,]+?\(a0c,([^)].+?)\)", html)
                 limit = int(parameters[2], 16)
                 c = 0
                 while True:
@@ -226,7 +229,9 @@ class EgyGrab():
 
 check_updates(sys.argv[0])
 
+# URL = 'https://egybest.org/episode/a-discovery-of-witches-season-1-ep-2/'
 URL = sys.argv[1]
+
 QUALITY = sys.argv[2] if len(sys.argv) > 2 else '1080p'
 grabber = EgyGrab(URL)
 

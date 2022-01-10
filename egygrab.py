@@ -13,7 +13,7 @@ import sys
 import re
 import os
 
-__version__ = "1.1"
+__version__ = "1.2"
 
 
 def check_updates(current_filename):
@@ -70,7 +70,8 @@ class EgyGrab():
         for url in urls:
             season_results = []
             i = 0
-            html = requests.get(url).text
+            html = requests.get(url)
+            html = html.text
             for match in re.finditer(r'<a href="(https:\/\/egybest.org\/episode\/.+?)"', html):
                 t = threading.Thread(target=lambda: season_results.append(self.__grab_item(match[1], quality, True, i)))
                 i+=1

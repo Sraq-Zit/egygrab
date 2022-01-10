@@ -112,7 +112,7 @@ class EgyGrab():
                 if permitted:
                     code = re.search(q + r'.+?"(/api\?call=.+?)"><i class="i-dl">', html)
             if not code:
-                print('%s not link was available'%url)
+                print('%s no link was available'%url)
                 return (id, '')
             code = code[1]
             # watch = 'https://egybest.org'+re.search(r'<iframe.+?src="(.+?)"', html)[1]

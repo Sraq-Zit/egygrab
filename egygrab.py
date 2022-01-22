@@ -6,6 +6,7 @@ from enum import Enum
 import threading
 import traceback
 import requests
+import argparse
 import base64
 import pickle
 import time
@@ -13,7 +14,7 @@ import sys
 import re
 import os
 
-__version__ = "1.2"
+__version__ = "1.3"
 
 
 def check_updates(current_filename):
@@ -55,9 +56,9 @@ class EgyGrab():
         self.threads = []
         self.results = []
     
-    def grab(self, quality='1080p'):
+    def grab(self, quality='1080p', cookies=True):
         if self.type == TYPES.episode or self.type == TYPES.masrahiya or self.type == TYPES.movie:
-            return [self.__grab_item(self.url, quality)[1]]
+            return [self.__grab_item(self.url, quality, cookies)[1]]
 
         
         urls = [self.url]
@@ -73,7 +74,7 @@ class EgyGrab():
             html = requests.get(url)
             html = html.text
             for match in re.finditer(r'<a href="(https:\/\/egybest.org\/episode\/.+?)"', html):
-                t = threading.Thread(target=lambda: season_results.append(self.__grab_item(match[1], quality, True, i)))
+                t = threading.Thread(target=lambda: season_results.append(self.__grab_item(match[1], quality, cookies, i)))
                 i+=1
                 t.start()
                 self.threads.append(t)
@@ -230,16 +231,21 @@ class EgyGrab():
 
 check_updates(sys.argv[0])
 
-# URL = 'https://egybest.org/episode/a-discovery-of-witches-season-1-ep-2/'
-URL = sys.argv[1]
+parser = argparse.ArgumentParser(prog='EgyGrab')
+parser.add_argument('url', help='An Egybest url of a movie, episode, season, or series')
+parser.add_argument('-q', '--quality', default='1080p', help='240p, 360p, 480p, 720p, or 1080p')
+parser.add_argument('-C', '--no-cookies', dest='cookies', action='store_false', help='Creates a new session for each grabbing')
 
-QUALITY = sys.argv[2] if len(sys.argv) > 2 else '1080p'
-grabber = EgyGrab(URL)
+args = parser.parse_args()
+
+# URL = 'https://egybest.org/episode/a-discovery-of-witches-season-1-ep-2/'
+
+grabber = EgyGrab(args.url)
 
 print('Your URL links to "%s"'%grabber.type.name)
 
-filename = re.search(r'.+?\/%s\/(.+?)(\/|$)'%grabber.type.name, URL)[1] + '.txt'
+filename = re.search(r'.+?\/%s\/(.+?)(\/|$)'%grabber.type.name, args.url)[1] + '.txt'
 
-open(filename, 'w').write('\n'.join(grabber.grab(QUALITY)))
+open(filename, 'w').write('\n'.join(grabber.grab(args.quality)))
 
 print('Links were saved in "%s"'%filename)

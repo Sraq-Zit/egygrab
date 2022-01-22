@@ -14,7 +14,7 @@ import sys
 import re
 import os
 
-__version__ = "1.3"
+__version__ = "1.3.1"
 
 
 def check_updates(current_filename):
@@ -232,9 +232,9 @@ class EgyGrab():
 check_updates(sys.argv[0])
 
 parser = argparse.ArgumentParser(prog='EgyGrab')
-parser.add_argument('url', help='An Egybest url of a movie, episode, season, or series')
-parser.add_argument('-q', '--quality', default='1080p', help='240p, 360p, 480p, 720p, or 1080p')
-parser.add_argument('-C', '--no-cookies', dest='cookies', action='store_false', help='Creates a new session for each grabbing')
+parser.add_argument('url', help='an Egybest url of a movie, episode, season, or series. should start with https://egybest.org/')
+parser.add_argument('-q', '--quality', type=str, default='1080p', help='the desired quality')
+parser.add_argument('-C', '--no-cookies', dest='cookies', action='store_false', help='creates a new session for each grabbing request')
 
 args = parser.parse_args()
 

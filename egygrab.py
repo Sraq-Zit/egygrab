@@ -14,7 +14,7 @@ import sys
 import re
 import os
 
-__version__ = "1.3.1"
+__version__ = "1.3.2"
 
 
 def check_updates(current_filename):
@@ -145,12 +145,12 @@ class EgyGrab():
                 cipher = [c.translate(c.maketrans(key, ''.join([str(i) for i in range(len(key))]))) for c in cipher]
                 cipher = [chr(int(c, base) - offset) for c in cipher if c]
                 # print(sess.cookies)
-                c_name, c_value = tuple(re.search(r'cookie="(.+?);', ''.join(cipher))[1].split('='))
-                sess.cookies.set(c_name, c_value)
+                # c_name, c_value = tuple(re.search(r'cookie="(.+?);', ''.join(cipher))[1].split('='))
+                # sess.cookies.set(c_name, c_value)
                 time.sleep(1)
                 sess.post(verification, data={val[1]: val[2]})
                 vidstream = sess.get('https://egybest.org'+code, allow_redirects=False).headers['location']
-                sess.cookies.pop(c_name)
+                # sess.cookies.pop(c_name)
             else:
                 # print('vidstream link grabbed using cookies')
                 pass
@@ -238,7 +238,7 @@ parser.add_argument('-C', '--no-cookies', dest='cookies', action='store_false', 
 
 args = parser.parse_args()
 
-# URL = 'https://egybest.org/episode/a-discovery-of-witches-season-1-ep-2/'
+# args.url = 'https://egybest.org/episode/a-discovery-of-witches-season-1-ep-2/'
 
 grabber = EgyGrab(args.url)
 

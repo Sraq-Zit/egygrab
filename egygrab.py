@@ -64,7 +64,7 @@ class EgyGrab():
         urls = [self.url]
         if self.type == TYPES.series:
             html = requests.get(self.url).text
-            urls = reversed([match[1] for match in re.finditer(r'<a href="(https:\/\/egybest.org\/season\/.+?)"', html)])
+            urls = reversed([match[1] for match in re.finditer(r'<a href="(https:\/\/w\.egybest.org\/season\/.+?)"', html)])
 
         self.threads = []
         self.results = []
@@ -73,7 +73,7 @@ class EgyGrab():
             i = 0
             html = requests.get(url)
             html = html.text
-            for match in re.finditer(r'<a href="(https:\/\/egybest.org\/episode\/.+?)"', html):
+            for match in re.finditer(r'<a href="(https:\/\/w\.egybest.org\/episode\/.+?)"', html):
                 t = threading.Thread(target=lambda: season_results.append(self.__grab_item(match[1], quality, cookies, i)))
                 i+=1
                 t.start()
@@ -102,7 +102,7 @@ class EgyGrab():
 
             # print(html)
             html = html.replace("'+'", '')
-            # call = 'https://egybest.org/api?call='+re.search(r'rel="#yt_trailer".+?data-call="(.+?)"', html)[1]
+            # call = 'https://w.egybest.org/api?call='+re.search(r'rel="#yt_trailer".+?data-call="(.+?)"', html)[1]
             qualities = ['240p', '480p', '720p', '1080p']
             permitted = False
             code = None
@@ -116,7 +116,7 @@ class EgyGrab():
                 print('%s no link was available'%url)
                 return (id, '')
             code = code[1]
-            # watch = 'https://egybest.org'+re.search(r'<iframe.+?src="(.+?)"', html)[1]
+            # watch = 'https://w.egybest.org'+re.search(r'<iframe.+?src="(.+?)"', html)[1]
             name = re.search(r"([a-z0-9]+)={'url':[^,]+?\+([a-z0-9]{3,}),", html, re.I)
             data = re.search(r"([a-z0-9]{3,})\['forEach'].+?%s\+=([a-z0-9]+?)\[.+?]"%name[2], html, re.I)
             for val in re.finditer(r"%s\['data'\]\['([^']+?)'\]='([^']+?)'"%name[1], html): pass
@@ -132,10 +132,10 @@ class EgyGrab():
             for i in range(len(l)):
                 data[a].append(l[i])
 
-            vidstream = sess.get('https://egybest.org'+code, allow_redirects=False).headers['location']
+            vidstream = sess.get('https://w.egybest.org'+code, allow_redirects=False).headers['location']
             if vidstream[:2] == '/?':
-                verification = 'https://egybest.org/api?call='+(''.join([data[b][v] for v in data[a] if v in data[b]]))
-                click = 'https://egybest.org/'+base64.b64decode(re.search(r"=\['([^']+?)'\]", html)[1] + '===').decode('utf8')
+                verification = 'https://w.egybest.org/api?call='+(''.join([data[b][v] for v in data[a] if v in data[b]]))
+                click = 'https://w.egybest.org/'+base64.b64decode(re.search(r"=\['([^']+?)'\]", html)[1] + '===').decode('utf8')
                 res = sess.get(click).text
                 args = re.search(r'\("(.+?)",(\d+),"(.+?)",(\d+),(\d+),(\d+)\)', res)
                 cipher, _, key, offset, base, _ = args.groups()
@@ -149,20 +149,20 @@ class EgyGrab():
                 # sess.cookies.set(c_name, c_value)
                 time.sleep(1)
                 sess.post(verification, data={val[1]: val[2]})
-                vidstream = sess.get('https://egybest.org'+code, allow_redirects=False).headers['location']
+                vidstream = sess.get('https://w.egybest.org'+code, allow_redirects=False).headers['location']
                 # sess.cookies.pop(c_name)
             else:
                 # print('vidstream link grabbed using cookies')
                 pass
-            # vidstream = 'https://egybest.org/vs-mirror/vidstream.to/f/YvD0EpU8nU'
-            vidstream = 'https://egybest.org/vs-mirror/'+re.search(r'vidstream.+?\/f\/.+?\/', vidstream)[0]
+            # vidstream = 'https://w.egybest.org/vs-mirror/vidstream.to/f/YvD0EpU8nU'
+            vidstream = 'https://w.egybest.org/vs-mirror/'+re.search(r'vidstream.+?\/f\/.+?\/', vidstream)[0]
             # print(vidstream)
             html = sess.get(vidstream).text
             # print(html)
             # html = open('html.txt', encoding='utf-8').read()
 
             if not re.search('<a href="(h.+?)" class="bigbutton"', html):
-                a0c = literal_eval(re.search(r'var G=(\[.+?\]);', html)[1])
+                a0c = literal_eval(re.search(r'var \w=(\[.+?\]);', html)[1])
                 a0d_offset = re.search(r'return a0d=function\(d,e\)\{d=d-([^;]+?);', html)[1]
                 def a0d(a):
                     a=int(a, 16)-int(a0d_offset, 16)
@@ -208,10 +208,10 @@ class EgyGrab():
                     keys[int(match[1], 16)] = a0d(match[2])
 
                 # print(token)
-                sess.get('https://egybest.org/'+base64.b64decode(token + '===').decode('utf8'))
+                sess.get('https://w.egybest.org/'+base64.b64decode(token + '===').decode('utf8'))
                 verification = ''.join([values[keys[i]] for i in range(len(keys)) if keys[i] in values])
                 # time.sleep(.2)
-                sess.post('https://egybest.org/tvc.php?verify='+verification, data={re.search(r"'([^']+?)':'ok'", html)[1]: 'ok'})
+                sess.post('https://w.egybest.org/tvc.php?verify='+verification, data={re.search(r"'([^']+?)':'ok'", html)[1]: 'ok'})
                 html = sess.get(vidstream).text
             else:
                 # print('download link grabbed using cookies')
@@ -232,13 +232,13 @@ class EgyGrab():
 check_updates(sys.argv[0])
 
 parser = argparse.ArgumentParser(prog='EgyGrab')
-parser.add_argument('url', help='an Egybest url of a movie, episode, season, or series. should start with https://egybest.org/')
+parser.add_argument('url', help='an Egybest url of a movie, episode, season, or series. should start with https://w.egybest.org/')
 parser.add_argument('-q', '--quality', type=str, default='1080p', help='the desired quality')
 parser.add_argument('-C', '--no-cookies', dest='cookies', action='store_false', help='creates a new session for each grabbing request')
 
 args = parser.parse_args()
 
-# args.url = 'https://egybest.org/episode/a-discovery-of-witches-season-1-ep-2/'
+# args.url = 'https://w.egybest.org/episode/a-discovery-of-witches-season-1-ep-2/'
 
 grabber = EgyGrab(args.url)
 

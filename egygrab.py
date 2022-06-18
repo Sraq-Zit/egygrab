@@ -14,7 +14,7 @@ import sys
 import re
 import os
 
-__version__ = "1.3.3"
+__version__ = "1.4.0"
 
 
 def check_updates(current_filename):
@@ -42,6 +42,9 @@ class TYPES(Enum):
     season = 'season'
     series = 'series'
     movie = 'movie'
+    anime = 'anime'
+    show = 'show'
+    wwe = 'wwe-show'
 
 
 class EgyGrab():
@@ -49,7 +52,7 @@ class EgyGrab():
         self.dl_url = self.url = url
         self.type = None
         for t in TYPES:
-            if '/%s/'%t.name in url:
+            if '/%s/'%t.value in url:
                 self.type = TYPES[t.name]
                 break
         if self.type is None: raise ValueError('There is nothing to download :(')
@@ -57,12 +60,12 @@ class EgyGrab():
         self.results = []
     
     def grab(self, quality='1080p', cookies=True):
-        if self.type == TYPES.episode or self.type == TYPES.masrahiya or self.type == TYPES.movie:
+        if self.type in [TYPES.episode, TYPES.masrahiya, TYPES.movie]:
             return [self.__grab_item(self.url, quality, cookies)[1]]
 
         
         urls = [self.url]
-        if self.type == TYPES.series:
+        if self.type in [TYPES.series, TYPES.anime, TYPES.wwe, TYPES.show]:
             html = requests.get(self.url).text
             urls = reversed([match[1] for match in re.finditer(r'<a href="(https:\/\/w\.egybest.org\/season\/.+?)"', html)])
 
@@ -238,13 +241,13 @@ parser.add_argument('-C', '--no-cookies', dest='cookies', action='store_false', 
 
 args = parser.parse_args()
 
-# args.url = 'https://w.egybest.org/episode/a-discovery-of-witches-season-1-ep-2/'
+# args.url = 'https://w.egybest.org/anime/spy-x-family/?ref=animes-p1'
 
 grabber = EgyGrab(args.url)
 
 print('Your URL links to "%s"'%grabber.type.name)
 
-filename = re.search(r'.+?\/%s\/(.+?)(\/|$)'%grabber.type.name, args.url)[1] + '.txt'
+filename = re.search(r'.+?\/%s\/(.+?)(\/|$)'%grabber.type.value, args.url)[1] + '.txt'
 
 open(filename, 'w').write('\n'.join(grabber.grab(args.quality)))
 

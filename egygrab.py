@@ -14,7 +14,7 @@ import sys
 import re
 import os
 
-__version__ = "1.4.0"
+__version__ = "1.4.1"
 
 
 def check_updates(current_filename):
@@ -67,7 +67,7 @@ class EgyGrab():
         urls = [self.url]
         if self.type in [TYPES.series, TYPES.anime, TYPES.wwe, TYPES.show]:
             html = requests.get(self.url).text
-            urls = reversed([match[1] for match in re.finditer(r'<a href="(https:\/\/w\.egybest.org\/season\/.+?)"', html)])
+            urls = reversed(['https://w.egybest.org' + match[1] for match in re.finditer(r'(\/season\/.+?)"', html)])
 
         self.threads = []
         self.results = []
@@ -76,8 +76,8 @@ class EgyGrab():
             i = 0
             html = requests.get(url)
             html = html.text
-            for match in re.finditer(r'<a href="(https:\/\/w\.egybest.org\/episode\/.+?)"', html):
-                t = threading.Thread(target=lambda: season_results.append(self.__grab_item(match[1], quality, cookies, i)))
+            for match in re.finditer(r'(\/episode\/.+?)"', html):
+                t = threading.Thread(target=lambda: season_results.append(self.__grab_item('https://w.egybest.org' + match[1], quality, cookies, i)))
                 i+=1
                 t.start()
                 self.threads.append(t)
@@ -241,7 +241,8 @@ parser.add_argument('-C', '--no-cookies', dest='cookies', action='store_false', 
 
 args = parser.parse_args()
 
-# args.url = 'https://w.egybest.org/anime/spy-x-family/?ref=animes-p1'
+# args.url = 'https://w.egybest.org/series/new-amsterdam/?ref=home-tv'
+# args.quality = '1080p'
 
 grabber = EgyGrab(args.url)
 

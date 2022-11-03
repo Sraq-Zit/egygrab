@@ -127,8 +127,9 @@ class EgyGrab():
 
             data = { a: {}, b: {} }
             for arrName in data.keys():
-                for p in re.finditer(r"%s\[([^\]]+?)]='(.+?)'[,;]"%arrName, html):
-                    data[arrName][eval(p[1])] = p[2]
+                for p in re.finditer(r"%s\[([^\]]+?)]='(.+?)'[,;]"%arrName, html, re.I):
+                    k = p[1][1:-1] if p[1][0] == "'" else int(evaluate(p[1]))
+                    data[arrName][k] = p[2]
 
             l = data[a]
             data[a] = []
